@@ -1,19 +1,34 @@
 import json
+import os
+
 import numpy as np
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 app = FastAPI()
-app.add_middleware(CORSMiddleware, allow_origins=["*"],
-                   allow_methods=["POST", "OPTIONS"], allow_headers=["*"])
 
-with open("data.json") as f:
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["POST", "OPTIONS"],
+    allow_headers=["*"],
+)
+
+DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.json")
+with open(DATA_PATH) as f:
     DATA = json.load(f)
+
 
 class Req(BaseModel):
     regions: list[str]
     threshold_ms: float = 180
+
+
+@app.get("/")
+def health():
+    return {"status": "ok"}
+
 
 @app.post("/")
 def metrics(req: Req):
